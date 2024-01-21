@@ -10,7 +10,7 @@ from succinct_column import SuccinctColumn
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file) -> None:
+    def __init__(self, fasta_file, vector="SDVector") -> None:
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -18,13 +18,15 @@ class SuccinctMultipleAlignment:
         -----------
         fasta_file : str
             A FASTA file containing multiple sequences aligned.
+        vector : str
+            Selection of the class representing the bit vector.
 
         Return:
         -------
         None
         """
         self.__size, self.__length = self.fetch_alignment_size(fasta_file)
-        self.__multialign = [SuccinctColumn(self.fetch_column(fasta_file, position)) for position in range(self.length)]
+        self.__multialign = [SuccinctColumn(self.fetch_column(fasta_file, position), vector=vector) for position in range(self.length)]
 
     @staticmethod
     def fetch_alignment_size(fasta_file) -> (int, int):

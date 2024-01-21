@@ -14,6 +14,8 @@ class SuccinctColumn:
         -----------
         column_seq : str
             All the nucleotides in a column of a multiple alignment.
+        vector : str
+            Selection of the class representing the bit vector.
 
         Return:
         -------
