@@ -5,7 +5,7 @@ import pysdsl
 # Class definition
 class SuccinctColumn:
 
-    def __init__(self, column_seq, vector="SDVector") -> None:
+    def __init__(self, column_seq, vector="SDVector"):
         """
         Build a SDVector or a BitVector and a sequence of nucleotides (corresponding to the "1" in the bit sequence) from all the nucleotides 
         in a column.
@@ -33,7 +33,7 @@ class SuccinctColumn:
 
 
     @staticmethod
-    def seq_to_bytes_nts(column_seq) -> (list(int), str):
+    def seq_to_bytes_nts(column_seq):
         """
         Builds a sequence of 0 and 1 and a string of nucleotides corresponding to the "1" from the nucleotides in a column. To clarify,
         if in the column a nucleotide if the same as the previous one, the value at the considered position is 0, else it is 1.
@@ -62,7 +62,7 @@ class SuccinctColumn:
                 bytes_list.append(0)
         return bytes_list, nt_kept
 
-    def size_in_bytes(self) -> int:
+    def size_in_bytes(self):
         """
         Return the size in bytes of the pysdsl vector representing the column of nucleotides.
 
@@ -77,7 +77,7 @@ class SuccinctColumn:
         """
         return self.__vector.size_in_bytes
 
-    def nt_frequency(self, decimals=2) -> (float, float, float, float):
+    def nt_frequency(self, decimals=2):
         """
         Returns the percentage of each nucleotide in the column.
 
@@ -103,7 +103,7 @@ class SuccinctColumn:
         length_vector = len(self.__vector)
         return tuple(round(nt_count_dict[char]/length_vector, decimals) for char in nt_count_dict)
     
-    def get_nt(self, position) -> str:
+    def get_nt(self, position):
         """
         Returns the nucleotide at the position specified in the column (the p-th sequence in the alignment).
 
@@ -126,3 +126,5 @@ class SuccinctColumn:
             del to_rank
         return nt
 
+    def get_vector(self):
+        return self.__vector
