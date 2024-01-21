@@ -133,9 +133,9 @@ class SuccinctMultipleAlignment:
         str :
             The sequence of index "seq_index".
         """
-        return "".join([self.get_nt(seq_index, position) for position in self.__length])
+        return "".join([self.get_nt(seq_index, position) for position in range(self.__length)])
 
-    def get_align(self, index):
+    def get_vector(self, index):
         return self.__multialign[index].get_vector()
 
     def get_info(self):

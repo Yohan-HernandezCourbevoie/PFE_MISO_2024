@@ -13,8 +13,11 @@ print(fetch_column)
 print('get_nt() :')
 print(align.get_nt(3, 4858))
 
-print('get_align() :')
-print(align.get_align(1))
+print('get_sequence() :')
+print(align.get_sequence(3))
+
+print('get_vector() :')
+print(align.get_vector(1))
 
 print('get_info() :')
 print(align.get_info())
