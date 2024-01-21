@@ -10,7 +10,7 @@ from succinct_column import SuccinctColumn
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file, vector="SDVector") -> None:
+    def __init__(self, fasta_file, vector="SDVector"):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -26,10 +26,10 @@ class SuccinctMultipleAlignment:
         None
         """
         self.__size, self.__length = self.fetch_alignment_size(fasta_file)
-        self.__multialign = [SuccinctColumn(self.fetch_column(fasta_file, position), vector=vector) for position in range(self.length)]
+        self.__multialign = [SuccinctColumn(self.fetch_column(fasta_file, position), vector=vector) for position in range(self.__length)]
 
     @staticmethod
-    def fetch_alignment_size(fasta_file) -> (int, int):
+    def fetch_alignment_size(fasta_file):
         """
         Read the FASTA file and store the size and the number of sequences.
 
@@ -57,7 +57,7 @@ class SuccinctMultipleAlignment:
         return (seq_count, align_length)
 
     @staticmethod
-    def fetch_column(fasta_file, position) -> str:
+    def fetch_column(fasta_file, position):
         """
         Read the FASTA file and store the nucleotide at a specified position in each sequence.
 
@@ -83,11 +83,11 @@ class SuccinctMultipleAlignment:
                     if len_still_to_read >= len_seq:  # Instead of rebuilding the sequence, we only store the number of nt still to read.
                         len_still_to_read -= len_seq
                     else:
-                        column_seq += line[len_still_to_read]
+                        column_seq += line[len_still_to_read].upper()
                         len_still_to_read = -1
         return column_seq
 
-    def size_in_bytes(self) -> int:
+    def size_in_bytes(self):
         """
         Return the size in bytes of the entire succinct multiple alignment (sum of the size in bytes of all the SuccinctColumn objects).
 
@@ -102,7 +102,7 @@ class SuccinctMultipleAlignment:
         """
         return sum([succinct_column.size_in_bytes() for succinct_column in self.__multialign])
 
-    def get_nt(self, seq_index, position) -> str:
+    def get_nt(self, seq_index, position):
         """
         Return the nucleotide in the position specified in the sequence of index "seq_index".
 
@@ -119,7 +119,7 @@ class SuccinctMultipleAlignment:
         """
         return self.__multialign[position].get_nt(seq_index)
 
-    def get_sequence(self, seq_index) -> str:
+    def get_sequence(self, seq_index):
         """
         Return the sequence of index "seq_index".
 
@@ -135,3 +135,8 @@ class SuccinctMultipleAlignment:
         """
         return "".join([self.get_nt(seq_index, position) for position in self.__length])
 
+    def get_align(self, index):
+        return self.__multialign[index].get_vector()
+
+    def get_info(self):
+        return self.__length, self.__size
