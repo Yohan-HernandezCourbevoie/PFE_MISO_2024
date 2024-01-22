@@ -5,7 +5,7 @@ import pysdsl
 # Class definition
 class SuccinctColumn:
 
-    def __init__(self, column_seq, vector="SDVector"):
+    def __init__(self, (column_seq, nt_kept), vector="SDVector"):  # rename column_seq --> bitvector
         """
         Build a SDVector or a BitVector and a sequence of nucleotides (corresponding to the "1" in the bit sequence) from all the nucleotides 
         in a column.
@@ -21,19 +21,23 @@ class SuccinctColumn:
         -------
         None
         """
-        column_in_bits, self.__nucleotides = self.seq_to_bits_nts(column_seq)
-        del column_seq
-        bitvector = pysdsl.BitVector(column_in_bits)
-        del column_in_bits
-        if vector == "BitVector":
-            self.__vector = bitvector
+        self.__nucleotides = nt_kept
+        if column_seq == "BitVector":
+            self.__vector = column_seq
         elif vector == "SDVector":
-            self.__vector = pysdsl.SDVector(bitvector)
-        del bitvector
-
+            self.__vector = pysdsl.SDVector(column_seq)
+        # column_in_bytes, self.__nucleotides = self.seq_to_bytes_nts(column_seq)
+        # del column_seq
+        # bitvector = pysdsl.BitVector(column_in_bytes)
+        # del column_in_bytes
+        # if vector == "BitVector":
+        #     self.__vector = bitvector
+        # elif vector == "SDVector":
+        #     self.__vector = pysdsl.SDVector(bitvector)
+        # del bitvector
 
     @staticmethod
-    def seq_to_bits_nts(column_seq):
+    def seq_to_bytes_nts(column_seq):
         """
         Builds a sequence of 0 and 1 and a string of nucleotides corresponding to the "1" from the nucleotides in a column. To clarify,
         if in the column a nucleotide if the same as the previous one, the value at the considered position is 0, else it is 1.
@@ -50,17 +54,17 @@ class SuccinctColumn:
         str : 
             The nucleotides corresponding to each "1" in the simplified version of the column.
         """
-        bits_list = []
+        bytes_list = []
         nt_kept = ""
         previous_nt = ""
         for nt in column_seq:
             if nt != previous_nt:
-                bits_list.append(1)
+                bytes_list.append(1)
                 nt_kept += nt
                 previous_nt = nt
             else:
-                bits_list.append(0)
-        return bits_list, nt_kept
+                bytes_list.append(0)
+        return bytes_list, nt_kept
 
     def size_in_bytes(self):
         """

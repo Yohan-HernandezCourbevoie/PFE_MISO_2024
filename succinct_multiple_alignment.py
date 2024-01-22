@@ -5,7 +5,8 @@
 # Modules import
 import os
 from succinct_column import SuccinctColumn
-
+from Bio import SeqIO
+import pysdsl
 
 # Class definition
 class SuccinctMultipleAlignment:
@@ -26,7 +27,7 @@ class SuccinctMultipleAlignment:
         None
         """
         self.__size, self.__length = self.fetch_alignment_size(fasta_file)
-        self.__multialign = [SuccinctColumn(self.fetch_column(fasta_file, position), vector=vector) for position in range(self.__length)]
+        self.__multialign = [SuccinctColumn(self.fetch_column_V2(fasta_file, position), vector=vector) for position in range(self.__length)]
 
     @staticmethod
     def fetch_alignment_size(fasta_file):
@@ -140,3 +141,38 @@ class SuccinctMultipleAlignment:
 
     def get_info(self):
         return self.__length, self.__size
+
+    def fetch_column_V2(self, fasta_file, position):
+        """
+        Read the FASTA file and store the nucleotide at a specified position in each sequence.
+
+        Parameters:
+        -----------
+        fasta_file : str
+            A FASTA file containing multiple sequences aligned.
+        position : int
+            The position of the nucleotide to store in each sequence.
+
+        Return:
+        -------
+
+        """
+        seq_count = 0
+        bit_vector = pysdsl.BitVector(self.__size)
+        nt_kept, previous_nt = '', ''
+        with open(fasta_file, "r") as handle:
+            for record in SeqIO.parse(handle, 'fasta'):
+                if seq_count == 0 :
+                    bit_vector[seq_count] = 1
+                    nt_kept += record.seq[position].upper()
+                    previous_nt = record.seq[position]
+                    seq_count += 1
+                else:
+                    if previous_nt == record.seq[position]:
+                        seq_count += 1
+                    else:
+                        bit_vector[seq_count] = 1
+                        nt_kept += record.seq[position].upper()
+                        previous_nt = record.seq[position]
+                        seq_count += 1
+        return bit_vector, nt_kept
