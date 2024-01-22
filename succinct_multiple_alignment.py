@@ -27,7 +27,7 @@ class SuccinctMultipleAlignment:
         """
         self.__size, self.__length = self.fetch_alignment_size(fasta_file)
         self.__multialign = [SuccinctColumn(self.fetch_column(fasta_file, position), vector=vector) for position in range(self.__length)]
-
+        
     @staticmethod
     def fetch_alignment_size(fasta_file):
         """
@@ -44,8 +44,13 @@ class SuccinctMultipleAlignment:
             - The number of sequences.
             - The length of the sequences (which is supposed to be the same for every sequence).
         """
+        if not os.path.isfile(fasta_file):
+            raise FileNotFoundError("The file does not exist.")
         with open(fasta_file, "r") as fileIn:
             seq_count = 0  # sequence counter
+             sequences = fileIn.readlines()
+        if not sequences[0].startswith(">"):
+            raise ValueError("The FASTA file must begin  with a chevron'>'.")
             for line in fileIn.readlines():
                 if line.startswith(">"):
                     if seq_count == 1:
@@ -83,7 +88,10 @@ class SuccinctMultipleAlignment:
                     if len_still_to_read >= len_seq:  # Instead of rebuilding the sequence, we only store the number of nt still to read.
                         len_still_to_read -= len_seq
                     else:
-                        column_seq += line[len_still_to_read].upper()
+                        nt= line[len_still_to_read].upper()
+                        if nt not in {'A','T','C','G','-'}:
+                            raise ValueError("There is an invalid nucleotide in the sequence.")
+                        column_seq += nt
                         len_still_to_read = -1
         return column_seq
 
