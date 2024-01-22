@@ -101,7 +101,7 @@ class SuccinctColumn:
                 count_one += 1
             nt_count_dict[self.__nucleotides[count_one]] += 1
         length_vector = len(self.__vector)
-        return tuple(round(nt_count_dict[char]/length_vector, decimals) for char in nt_count_dict)
+        return tuple(round(nt_count_dict[char]/float(length_vector), decimals) for char in nt_count_dict)
     
     def get_nt(self, position):
         """
