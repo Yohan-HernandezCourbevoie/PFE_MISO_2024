@@ -1,14 +1,14 @@
-from version_biopyt.succinct_multiple_alignment import SuccinctMultipleAlignment
-from version_biopyt.succinct_column import SuccinctColumn
+from succinct_multiple_alignment import SuccinctMultipleAlignment
+from succinct_column import SuccinctColumn
 
-align = SuccinctMultipleAlignment('../10_seq.fasta')
+align = SuccinctMultipleAlignment('10_seq.fasta')
 
 print("SuccinctMultipleAlignment :")
 print('size_in_bytes() :')
 print(align.size_in_bytes())
 
 print('fetch_column() :')
-fetch_column = align.fetch_column_V2('../10_seq.fasta', 3)
+fetch_column = align.fetch_column_V2('10_seq.fasta', 3)
 print(fetch_column)
 
 print('get_nt() :')
