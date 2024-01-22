@@ -27,8 +27,8 @@ print('\nSuccinctColumn :')
 column = SuccinctColumn(fetch_column)
 
 print('SuccinctColumn :')
-print('seq_to_bytes_nts :')
-print(column.seq_to_bytes_nts(fetch_column))
+print('seq_to_bits_nts :')
+print(column.seq_to_bits_nts(fetch_column))
 
 print('size_in_bytes() :')
 print(column.size_in_bytes())

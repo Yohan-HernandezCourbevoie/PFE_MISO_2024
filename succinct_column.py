@@ -21,10 +21,10 @@ class SuccinctColumn:
         -------
         None
         """
-        column_in_bytes, self.__nucleotides = self.seq_to_bytes_nts(column_seq)
+        column_in_bits, self.__nucleotides = self.seq_to_bits_nts(column_seq)
         del column_seq
-        bitvector = pysdsl.BitVector(column_in_bytes)
-        del column_in_bytes
+        bitvector = pysdsl.BitVector(column_in_bits)
+        del column_in_bits
         if vector == "BitVector":
             self.__vector = bitvector
         elif vector == "SDVector":
@@ -33,7 +33,7 @@ class SuccinctColumn:
 
 
     @staticmethod
-    def seq_to_bytes_nts(column_seq):
+    def seq_to_bits_nts(column_seq):
         """
         Builds a sequence of 0 and 1 and a string of nucleotides corresponding to the "1" from the nucleotides in a column. To clarify,
         if in the column a nucleotide if the same as the previous one, the value at the considered position is 0, else it is 1.
@@ -50,17 +50,17 @@ class SuccinctColumn:
         str : 
             The nucleotides corresponding to each "1" in the simplified version of the column.
         """
-        bytes_list = []
+        bits_list = []
         nt_kept = ""
         previous_nt = ""
         for nt in column_seq:
             if nt != previous_nt:
-                bytes_list.append(1)
+                bits_list.append(1)
                 nt_kept += nt
                 previous_nt = nt
             else:
-                bytes_list.append(0)
-        return bytes_list, nt_kept
+                bits_list.append(0)
+        return bits_list, nt_kept
 
     def size_in_bytes(self):
         """
