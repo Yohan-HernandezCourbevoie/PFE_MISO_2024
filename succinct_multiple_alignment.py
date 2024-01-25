@@ -1,7 +1,7 @@
 """
 
 """
-
+#-*- coding: utf-8 -*-
 # Modules import
 import os
 from succinct_column import SuccinctColumn
