@@ -11,7 +11,7 @@ import pysdsl
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file, vector="SDVector"):
+    def __init__(self, fasta_file, nb_columns = 1000, vector="SDVector"):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -26,8 +26,12 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
+        self.__multialign = []
         self.__size, self.__length = self.fetch_alignment_size(fasta_file)
-        self.__multialign = [SuccinctColumn(self.fetch_column_V2(fasta_file, position), vector=vector) for position in range(self.__length)]
+        for position in range(0, self.__length, nb_columns):
+            self.__multialign += self.fetch_column_V2(fasta_file, position, nb_columns, vector)
+    def __len__(self):
+        return len(self.__multialign)
 
     @staticmethod
     def fetch_alignment_size(fasta_file):
@@ -139,10 +143,13 @@ class SuccinctMultipleAlignment:
     def get_vector(self, index):
         return self.__multialign[index].get_vector()
 
+    def get_kept_nucleotide(self, index):
+        return self.__multialign[index].get_kept_nucleotide()
+
     def get_info(self):
         return self.__length, self.__size
 
-    def fetch_column_V2(self, fasta_file, position):
+    def fetch_column_V2(self, fasta_file, position, nb_column, vector="SDVector"):
         """
         Read the FASTA file and store the nucleotide at a specified position in each sequence.
 
@@ -158,21 +165,26 @@ class SuccinctMultipleAlignment:
 
         """
         seq_count = 0
-        bit_vector = pysdsl.BitVector(self.__size)
-        nt_kept, previous_nt = '', ''
+        nt_kept, previous_nt = ['']*nb_column, ['']*nb_column
+        bit_vectors =  []
         with open(fasta_file, "r") as handle:
             for record in SeqIO.parse(handle, 'fasta'):
-                if seq_count == 0 :
-                    bit_vector[seq_count] = 1
-                    nt_kept += record.seq[position].upper()
-                    previous_nt = record.seq[position]
-                    seq_count += 1
-                else:
-                    if previous_nt == record.seq[position]:
-                        seq_count += 1
-                    else:
-                        bit_vector[seq_count] = 1
-                        nt_kept += record.seq[position].upper()
-                        previous_nt = record.seq[position]
-                        seq_count += 1
-        return bit_vector, nt_kept
+                i = 0
+                #for i in range(0, nb_column):
+                while i < nb_column and position+i < self.__length:
+                    if seq_count == 0:
+                        bit_vectors.append(pysdsl.BitVector(self.__size))
+                        bit_vectors[i][seq_count] = 1
+                        nt_kept[i] += record.seq[position + i].upper()
+                        previous_nt[i] = record.seq[position + i]
+                    elif seq_count != 0 and previous_nt[i] != record.seq[position + i]:
+                        bit_vectors[i][seq_count] = 1
+                        nt_kept[i] += record.seq[position + i].upper()
+                        previous_nt[i] = record.seq[position + i]
+                    i += 1
+                seq_count += 1
+        sd_vector = []
+        for i in range(len(bit_vectors)):
+            sd_vector.append(SuccinctColumn((bit_vectors[i], nt_kept[i]), vector=vector))
+
+        return sd_vector

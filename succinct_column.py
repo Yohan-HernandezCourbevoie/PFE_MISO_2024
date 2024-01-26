@@ -26,15 +26,16 @@ class SuccinctColumn:
             self.__vector = column_seq
         elif vector == "SDVector":
             self.__vector = pysdsl.SDVector(column_seq)
-        # column_in_bytes, self.__nucleotides = self.seq_to_bytes_nts(column_seq)
-        # del column_seq
-        # bitvector = pysdsl.BitVector(column_in_bytes)
-        # del column_in_bytes
-        # if vector == "BitVector":
-        #     self.__vector = bitvector
+        # self.__nucleotides = nt_kept
+        # if column_seq == "BitVector":
+        #     self.__vector.append(column_seq)
         # elif vector == "SDVector":
-        #     self.__vector = pysdsl.SDVector(bitvector)
-        # del bitvector
+        #     self.__vector = [pysdsl.SDVector(bit_vector) for bit_vector in column_seq]
+        # print(type(self.__vector))
+        # print(self.__vector)
+
+    def __len__(self):
+        return len(self.__vector)
 
     @staticmethod
     def seq_to_bytes_nts(column_seq):
@@ -132,3 +133,6 @@ class SuccinctColumn:
 
     def get_vector(self):
         return self.__vector
+
+    def get_kept_nucleotide(self):
+        return self.__nucleotides
