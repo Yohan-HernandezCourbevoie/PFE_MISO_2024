@@ -1,4 +1,5 @@
 # Modules import
+#-*- coding: utf-8 -*-
 import pysdsl
 
 
