@@ -1,4 +1,4 @@
-from essai import SuccinctMultipleAlignment
+from succinct_multiple_alignment import SuccinctMultipleAlignment
 from succinct_column import SuccinctColumn
 
 align = SuccinctMultipleAlignment('1000_seq.fasta.gz', nb_columns=1000)
