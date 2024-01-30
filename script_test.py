@@ -1,7 +1,7 @@
-from succinct_multiple_alignment import SuccinctMultipleAlignment
+from essai import SuccinctMultipleAlignment
 from succinct_column import SuccinctColumn
 
-align = SuccinctMultipleAlignment('SARS-CoV-2_MSA_file2.fasta', nb_columns=1000)
+align = SuccinctMultipleAlignment('1000_seq.fasta.gz', nb_columns=1000)
 
 print("SuccinctMultipleAlignment :")
 print('len() :')
@@ -10,8 +10,8 @@ print('size_in_bytes() :')
 print(align.size_in_bytes())
 
 # print('fetch_column() :')
-# fetch_column = align.fetch_column_V2('1000_seq.fasta', 0, 1000)
-# print(fetch_column[0].get_vector())
+fetch_column = align.fetch_column_V2('1000_seq.fasta.gz', 0, 1000)
+print(fetch_column[0].get_vector())
 
 print('get_nt() :')
 print(align.get_nt(3, 5))
@@ -29,12 +29,12 @@ print('get_info() :')
 print(align.get_info())
 
 
-# print('\nSuccinctColumn :')
+print('\nSuccinctColumn :')
 #
-# column = fetch_column[0]
+column = fetch_column[0]
 #
-# print('size_in_bytes() :')
-# print(column.size_in_bytes())
+print('size_in_bytes() :')
+print(column.size_in_bytes())
 # 
 # print('len() :')
 # print(len(column))
@@ -45,5 +45,5 @@ print(align.get_info())
 # print('get_vector() :')
 # print(column.get_vector())
 
-# print('nt_frequency() :')
-# print(column.nt_frequency())
+print('nt_frequency() :')
+print(column.nt_frequency())
