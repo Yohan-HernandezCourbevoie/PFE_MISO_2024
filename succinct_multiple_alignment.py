@@ -1,17 +1,40 @@
-"""
-
-"""
 #-*- coding: utf-8 -*-
 # Modules import
 import os
 from succinct_column import SuccinctColumn
 from Bio import SeqIO
 import pysdsl
+import gzip
 
-# Class definition
+
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file, nb_columns = 1000, vector="SDVector"):
+    def validate_fasta_file(self, fasta_file):
+        """
+        Valide le fichier FASTA en utilisant Biopython.
+
+        Parameters:
+        -----------
+        fasta_file : str
+            Le chemin du fichier FASTA.
+
+        Raises:
+        -------
+        FileNotFoundError:
+            Si le fichier FASTA n'existe pas.
+        ValueError:
+            Si le fichier FASTA n'est pas au format attendu.
+        """
+        if not os.path.isfile(fasta_file):
+            raise FileNotFoundError(fasta_file)
+
+        # Essaye de lire le fichier avec SeqIO, cela va lever une exception si le format est incorrect.
+        try:
+            SeqIO.read(fasta_file, "fasta")
+        except Exception as e:
+            raise ValueError("Le fichier FASTA n'est pas au format attendu.")
+
+    def __init__(self, fasta_file, nb_columns = 100, vector="SDVector"):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -26,11 +49,14 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
+        #self.validate_fasta_file(fasta_file)  # Valide le fichier FASTA.
         self.__multialign = []
         self.__size, self.__length = self.fetch_alignment_size(fasta_file)
         for position in range(0, self.__length, nb_columns):
             self.__multialign += self.fetch_column_V2(fasta_file, position, nb_columns, vector)
-
+            
+            
+            
     def __len__(self):
         return len(self.__multialign)        
       
@@ -50,15 +76,13 @@ class SuccinctMultipleAlignment:
             - The number of sequences.
             - The length of the sequences (which is supposed to be the same for every sequence).
         """
-        if not os.path.isfile(fasta_file):
-            raise FileNotFoundError(fasta_file)
+       
             
-        with open(fasta_file, "r") as fileIn:
+        with gzip.open(fasta_file, 'rt') as fileIn:
             seq_count = 0  # sequence counter
-            sequences = fileIn.readlines()
-        if not sequences[0].startswith(">"):
-            raise ValueError("The FASTA file must begin  with a chevron'>'.")
+             
             for line in fileIn.readlines():
+            
                 if line.startswith(">"):
                     if seq_count == 1:
                         align_length = len_seq  # The length of the 1rst sequence is the length of the alignment.
@@ -66,9 +90,8 @@ class SuccinctMultipleAlignment:
                     len_seq = 0  # Length of the sequence read.
                 else:
                     len_seq += len(line.strip())
+                    
         return (seq_count, align_length)
-
-    @staticmethod
     def fetch_column(fasta_file, position):
         """
         Read the FASTA file and store the nucleotide at a specified position in each sequence.
@@ -85,7 +108,7 @@ class SuccinctMultipleAlignment:
         str :
             The nucleotides of every sequences at a specified position.
         """
-        with open (fasta_file, "r") as fileIn:
+        with gzip.open(fasta_file, 'rt') as fileIn:
             column_seq = ""
             for line in fileIn.readlines():
                 if line.startswith(">"):  # New sequence, reset variables
@@ -123,26 +146,39 @@ class SuccinctMultipleAlignment:
             position 'position'.
         """
         seq_count = 0
-        nt_kept, previous_nt = ['']*nb_column, ['']*nb_column
+        n_kept, previous_nt = ['']*nb_column, ['']*nb_column
         bit_vectors = []
-        with open(fasta_file, "r") as handle:
+        with gzip.open(fasta_file, 'rt') as handle:
             for record in SeqIO.parse(handle, 'fasta'):
                 i = 0
-                #for i in range(0, nb_column):
-                while i < nb_column and position+i < self.__length:
+                sequence=record.seq
+                sequence_length=len(sequence)
+                # Check if the sequence is long enough for the specified position and number of columns
+               
+                if position + nb_column > sequence_length:
+                    #print(" too short for the specified position and number of columns")
+                    continue 
+                while i < nb_column:
                     # record.seq[position + i] is the current nucleotide
                     if seq_count == 0:
                         bit_vectors.append(pysdsl.BitVector(self.__size))
                         bit_vectors[i][seq_count] = 1
-                        nt_kept[i] += record.seq[position + i].upper()
+                        n_kept[i] += record.seq[position + i].upper()
                         previous_nt[i] = record.seq[position + i]
+                        if len(bit_vectors) == 0:
+                        # Gérer le cas où bit_vectors est vide (peut-être lever une exception ou ajuster le comportement selon votre logique)
+                            raise ValueError("La liste bit_vectors est vide.")
                     elif seq_count != 0 and previous_nt[i] != record.seq[position + i]:
                         bit_vectors[i][seq_count] = 1
-                        nt_kept[i] += record.seq[position + i].upper()
+                        n_kept[i] += record.seq[position + i].upper()
                         previous_nt[i] = record.seq[position + i]
                     i += 1
                 seq_count += 1
-        return [SuccinctColumn(bit_vectors[i], nt_kept[i], vector=vector) for i in range(nb_column)]
+         
+        #print("Longueur de bit_vectors :", len(bit_vectors))
+        #print("Index utilisé :", i)
+    
+        return [SuccinctColumn(bit_vectors[i], n_kept[i], vector=vector) for i in range(min(nb_column, len(bit_vectors)))]
 
     def size_in_bytes(self):
         """
