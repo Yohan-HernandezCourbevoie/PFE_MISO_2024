@@ -55,7 +55,7 @@ class SuccinctMultipleAlignment:
             
         with open(fasta_file, "r") as fileIn:
             seq_count = 0  # sequence counter
-             sequences = fileIn.readlines()
+            sequences = fileIn.readlines()
         if not sequences[0].startswith(">"):
             raise ValueError("The FASTA file must begin  with a chevron'>'.")
             for line in fileIn.readlines():
