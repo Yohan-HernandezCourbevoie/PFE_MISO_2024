@@ -6,15 +6,17 @@ import pysdsl
 # Class definition
 class SuccinctColumn:
 
-    def __init__(self, column_seq, vector="SDVector"):
+    def __init__(self, bitvector, nt_kept, vector="SDVector"):
         """
-        Build a SDVector or a BitVector and a sequence of nucleotides (corresponding to the "1" in the bit sequence) from all the nucleotides 
-        in a column.
+        Build a SDVector or a BitVector and a sequence of nucleotides (corresponding to the "1" in the bit sequence) from all the 
+        nucleotides in a column.
 
         Parameters:
         -----------
-        column_seq : str
-            All the nucleotides in a column of a multiple alignment.
+        bitvector : pysdsl.BitVector
+            A bit vector corresponding to a simplified version of multiple alignment.
+        nt_kept : str
+            Nucleotides corresponding to the '1' in the bit vector.
         vector : str
             Selection of the class representing the bit vector.
 
@@ -22,19 +24,24 @@ class SuccinctColumn:
         -------
         None
         """
-        column_in_bits, self.__nucleotides = self.seq_to_bits_nts(column_seq)
-        del column_seq
-        bitvector = pysdsl.BitVector(column_in_bits)
-        del column_in_bits
+        self.__nucleotides = nt_kept
         if vector == "BitVector":
             self.__vector = bitvector
         elif vector == "SDVector":
             self.__vector = pysdsl.SDVector(bitvector)
-        del bitvector
+        # self.__nucleotides = nt_kept
+        # if column_seq == "BitVector":
+        #     self.__vector.append(column_seq)
+        # elif vector == "SDVector":
+        #     self.__vector = [pysdsl.SDVector(bit_vector) for bit_vector in column_seq]
+        # print(type(self.__vector))
+        # print(self.__vector)
 
+    def __len__(self):
+        return len(self.__vector)
 
     @staticmethod
-    def seq_to_bits_nts(column_seq):
+    def seq_to_bitvector_nts(column_seq):
         """
         Builds a sequence of 0 and 1 and a string of nucleotides corresponding to the "1" from the nucleotides in a column. To clarify,
         if in the column a nucleotide if the same as the previous one, the value at the considered position is 0, else it is 1.
@@ -76,7 +83,7 @@ class SuccinctColumn:
         int : 
             The size in bytes of the pysdsl vector representing the column of nucleotides
         """
-        return self.__vector.size_in_bytes
+        return self.__vector.size_in_bytes + len(self.__nucleotides)
 
     def nt_frequency(self, decimals=2):
         """
@@ -105,7 +112,7 @@ class SuccinctColumn:
         return tuple(round(nt_count_dict[char]/float(length_vector), decimals) for char in nt_count_dict)
     
     def get_nt(self, position):
-        """
+        """ 
         Returns the nucleotide at the position specified in the column (the p-th sequence in the alignment).
 
         Parameters:
@@ -128,4 +135,31 @@ class SuccinctColumn:
         return nt
 
     def get_vector(self):
+        """
+        Returns the SDVector object corresponding to the compacted representation of the bit vector.
+
+        Parameters:
+        -----------
+        None
+
+        Return:
+        -------
+        pysdsl.SDVector :
+            The SDVector object corresponding to the compacted representation of the bit vector.
+        """
         return self.__vector
+
+    def get_kept_nucleotide(self):
+        """
+        Returns the nucleotides used to deduce the column's sequence from the bit vector.
+
+        Parameters:
+        -----------
+        None
+
+        Return:
+        -------
+        str :
+            The nucleotides kept.
+        """
+        return self.__nucleotides
