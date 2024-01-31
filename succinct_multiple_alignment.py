@@ -64,7 +64,6 @@ class SuccinctMultipleAlignment:
             align_length = None
             for record in SeqIO.parse(handle, 'fasta'):
                 if align_length is None:
-                    print (len(record.seq))
                     align_length = len(record.seq)
                     seq_count += 1
                 else:
@@ -97,7 +96,6 @@ class SuccinctMultipleAlignment:
             align_length = None
             for record in SeqIO.parse(handle, 'fasta'):
                 if align_length is None:
-                    print (len(record.seq))
                     align_length = len(record.seq)
                     seq_count += 1
                 else:
