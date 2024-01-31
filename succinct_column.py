@@ -107,7 +107,16 @@ class SuccinctColumn:
         for byte in self.__vector:
             if byte == 1:
                 count_one += 1
-            nt_count_dict[self.__nucleotides[count_one]] += 1
+                
+            ct_nt= self.__nucleotides[count_one]
+            #Special treatment for 'W' (or other special characters) 
+            if ct_nt == 'W':
+                
+                # Dans cet exemple, nous le traitons comme une ambiguïté entre A et T au lieu de l'ignorer.
+                nt_count_dict['A'] += 0.5
+                nt_count_dict['T'] += 0.5
+            else:
+                nt_count_dict[self.__nucleotides[count_one]] += 1
         length_vector = len(self.__vector)
         return tuple(round(nt_count_dict[char]/float(length_vector), decimals) for char in nt_count_dict)
     
