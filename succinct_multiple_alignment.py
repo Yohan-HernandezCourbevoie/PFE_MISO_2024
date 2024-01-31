@@ -11,7 +11,7 @@ import pysdsl
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file, nb_columns = 1000, vector="SDVector"):
+    def __init__(self, fasta_file, nb_columns=1000, vector="SDVector"):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -52,20 +52,19 @@ class SuccinctMultipleAlignment:
         """
         if not os.path.isfile(fasta_file):
             raise FileNotFoundError(fasta_file)
-            
-        with open(fasta_file, "r") as fileIn:
+
+        with open(fasta_file, "r") as handle:
             seq_count = 0  # sequence counter
-            sequences = fileIn.readlines()
-        if not sequences[0].startswith(">"):
-            raise ValueError("The FASTA file must begin  with a chevron'>'.")
-            for line in fileIn.readlines():
-                if line.startswith(">"):
-                    if seq_count == 1:
-                        align_length = len_seq  # The length of the 1rst sequence is the length of the alignment.
+            align_length = None
+            for record in SeqIO.parse(handle, 'fasta'):
+                if align_length is None:
+                    print (len(record.seq))
+                    align_length = len(record.seq)
                     seq_count += 1
-                    len_seq = 0  # Length of the sequence read.
                 else:
-                    len_seq += len(line.strip())
+                    if align_length != len(record.seq):
+                        raise ValueError
+                    seq_count += 1
         return (seq_count, align_length)
 
     @staticmethod
@@ -123,14 +122,12 @@ class SuccinctMultipleAlignment:
             position 'position'.
         """
         seq_count = 0
-        nt_kept, previous_nt = ['']*nb_column, ['']*nb_column
+        nt_kept, previous_nt = [''] * nb_column, [''] * nb_column
         bit_vectors = []
         with open(fasta_file, "r") as handle:
             for record in SeqIO.parse(handle, 'fasta'):
                 i = 0
-                #for i in range(0, nb_column):
-                while i < nb_column and position+i < self.__length:
-                    # record.seq[position + i] is the current nucleotide
+                while i < nb_column and position + i < self.__length:
                     if seq_count == 0:
                         bit_vectors.append(pysdsl.BitVector(self.__size))
                         bit_vectors[i][seq_count] = 1
@@ -142,7 +139,12 @@ class SuccinctMultipleAlignment:
                         previous_nt[i] = record.seq[position + i]
                     i += 1
                 seq_count += 1
-        return [SuccinctColumn(bit_vectors[i], nt_kept[i], vector=vector) for i in range(nb_column)]
+        sd_vector = []
+
+        for i in range(len(bit_vectors)):
+            sd_vector.append(SuccinctColumn(bit_vectors[i], nt_kept[i], vector=vector))
+        del bit_vectors, nt_kept, previous_nt
+        return sd_vector
 
     def size_in_bytes(self):
         """
