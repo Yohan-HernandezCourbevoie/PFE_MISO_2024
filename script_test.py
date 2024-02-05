@@ -1,7 +1,11 @@
 from succinct_multiple_alignment import SuccinctMultipleAlignment
 from succinct_column import SuccinctColumn
+import time
+import matplotlib as plt
+import os
+import psutil
 
-align = SuccinctMultipleAlignment('SARS-CoV-2_MSA_file2.fasta', nb_columns=1000)
+align = SuccinctMultipleAlignment('1000_seq.fasta', nb_columns=1000)
 
 print("SuccinctMultipleAlignment :")
 print('len() :')
@@ -47,6 +51,7 @@ print(align.get_info())
 
 # print('nt_frequency() :')
 # print(column.nt_frequency())
+
 def time_profile(func, *args, **kwargs):
     #Enregistre le temps au debut avant l'execution de la fonction
     start_time = time.time()
@@ -54,21 +59,21 @@ def time_profile(func, *args, **kwargs):
     result = func(*args, **kwargs)
     ### temps apres l'execution
     end_time = time.time()
-    # calcul de la durée d'execution
+    # calcul de la duree d'execution
     execution_time = end_time - start_time
     
     return result, execution_time
 
 def memory_profile_psutil(func, *args, **kwargs):
     """ 
-    cette fonction mesure le temps, le temps d'exécution d'une fonction specifiée en utilisant 
+    cette fonction mesure le temps, le temps d'execution d'une fonction specifiee en utilisant 
     le module 
     """
     #processus
     process = psutil.Process(os.getpid())
     # print(process)
-    # mesure l'utilisation de la memoire avant en convertissant les octets en méga-octets
-    memory_avant = process.memory_info().rss / (1024.0 ** 2)  # En méga-octets car 1 mega-octet == 1024 kiloctet
+    # mesure l'utilisation de la memoire avant en convertissant les octets en mega-octets
+    memory_avant = process.memory_info().rss / (1024.0 ** 2)  # En mega-octets car 1 mega-octet == 1024 kiloctet
     result = func(*args, **kwargs)
     ##1 mega-octet == 1024 kiloctet
     memory_apres = process.memory_info().rss / (1024.0 ** 2)
@@ -80,10 +85,10 @@ def plot_time_memory_psutil(func, *args, **kwargs):
     # Temps
     _, execution_time = time_profile(func, *args, **kwargs)
     
-    # Mémoire
+    # Memoire
     memory_usage_result = memory_profile_psutil(func, *args, **kwargs)
     
-    # Génération des courbes
+    # Generation des courbes
     plt.figure(figsize=(10, 5))
     #courbe du temps d'execution 
     plt.subplot(1, 2, 1)
@@ -100,4 +105,4 @@ def plot_time_memory_psutil(func, *args, **kwargs):
     plt.show()
 
 # Exemple d'utilisation :
-plot_time_memory_psutil(align.fetch_column_V2, 'SARS-CoV-2_MSA_file2.fasta', 0, 1000)
+plot_time_memory_psutil(align.fetch_column, '1000_seq.fasta', 0, 1000)

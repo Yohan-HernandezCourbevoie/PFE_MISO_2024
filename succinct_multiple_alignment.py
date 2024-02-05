@@ -290,3 +290,23 @@ class SuccinctMultipleAlignment:
             The alignment size (number of sequences).
         """
         return self.__length, self.__size
+    
+    def size_to_csv(self):
+        """
+        Save the size in bytes of each SuccinctColumn object in a CSV file.
+
+        Paramaters:
+        -----------
+        None
+
+        Return:
+        -------
+        None
+        """
+        with open("size.csv", "w") as fileOut:
+            for i in range(self.__length):
+                fileOut.write(str(self.__multialign[i].size_in_bytes()))
+                if i != self.__length-1:
+                    fileOut.write(";")
+                else:
+                    fileOut.write("\n")
