@@ -85,7 +85,7 @@ class SuccinctColumn:
         """
         return self.__vector.size_in_bytes + len(self.__nucleotides)
 
-    def nt_frequency(self, decimals=2):
+   def nt_frequency(self, decimals=2):
         """
         Returns the percentage of each nucleotide in the column.
 
@@ -101,14 +101,18 @@ class SuccinctColumn:
             - percentage of C
             - percentage of G
             - percentage of -
+            -percentage of other nucleotide present
         """
         count_one = -1
-        nt_count_dict = {"A": 0, "T": 0, "C": 0, "G": 0, "-": 0}
+        nt_count_dict = defaultdict(int)
+        
         for byte in self.__vector:
             if byte == 1:
                 count_one += 1
             nt_count_dict[self.__nucleotides[count_one]] += 1
+            
         length_vector = len(self.__vector)
+        print(nt_count_dict)
         return tuple(round(nt_count_dict[char]/float(length_vector), decimals) for char in nt_count_dict)
     
     def get_nt(self, position):
