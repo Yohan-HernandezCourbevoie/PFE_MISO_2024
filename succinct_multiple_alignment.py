@@ -291,22 +291,34 @@ class SuccinctMultipleAlignment:
         """
         return self.__length, self.__size
     
-    def size_to_csv(self):
+   def size_to_csv(self, file_name="size.csv", sort_by_size=True):
         """
         Save the size in bytes of each SuccinctColumn object in a CSV file.
 
-        Paramaters:
+        Parameters:
         -----------
-        None
+        file_name: str, optional
+            The name of the CSV file to save the sizes. Default is "size.csv".
+        sort_by_size: bool, optional
+            If True, the sizes will be sorted in ascending order. Default is True.
 
         Return:
         -------
         None
         """
-        with open("size.csv", "w") as fileOut:
-            for i in range(self.__length):
-                fileOut.write(str(self.__multialign[i].size_in_bytes()))
-                if i != self.__length-1:
-                    fileOut.write(";")
-                else:
-                    fileOut.write("\n")
+        ### la liste de tailles des colonnes 
+        sizes = [(i, self.__multialign[i].size_in_bytes()) for i in range(self.__length)]
+        ### triee les colonnes par ordre croissant  de taille 
+        if sort_by_size:
+            sizes.sort(key=lambda x: x[1])
+        # ecriture dans le fichier CSV
+        with open(file_name, "w") as fileOut:
+            # 
+            writer = csv.writer(fileOut)
+            # ecriture d'en-tetes du csv
+            writer.writerow(["Index", "column sorted by size","cumulative column sizes "])
+            cumulative_size = 0
+            for i, size in sizes:
+                ###### pour la partie qui cumule  les tailles des colonnes
+                cumulative_size += size
+                writer.writerow([i, size, cumulative_size])
