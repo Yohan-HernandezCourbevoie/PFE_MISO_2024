@@ -1,7 +1,7 @@
 # Modules import
 #-*- coding: utf-8 -*-
 import pysdsl
-
+from collections import defaultdict 
 
 # Class definition
 class SuccinctColumn:
