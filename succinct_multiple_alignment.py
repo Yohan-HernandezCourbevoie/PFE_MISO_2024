@@ -8,6 +8,7 @@ from succinct_column import SuccinctColumn
 from Bio import SeqIO
 import pysdsl
 import gzip
+import csv 
 
 # Class definition
 class SuccinctMultipleAlignment:
