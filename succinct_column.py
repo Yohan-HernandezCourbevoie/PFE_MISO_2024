@@ -1,12 +1,13 @@
 # Modules import
 #-*- coding: utf-8 -*-
 import pysdsl
-from collections import defaultdict 
+import os
+
 
 # Class definition
 class SuccinctColumn:
 
-    def __init__(self, bitvector, nt_kept, vector="SDVector"):
+    def __init__(self, bitvector=None, nt_kept=None, vector="SDVector", load=False, dir_path=None, column=0):
         """
         Build a SDVector or a BitVector and a sequence of nucleotides (corresponding to the "1" in the bit sequence) from all the 
         nucleotides in a column.
@@ -24,51 +25,17 @@ class SuccinctColumn:
         -------
         None
         """
-        self.__nucleotides = nt_kept
-        if vector == "BitVector":
-            self.__vector = bitvector
-        elif vector == "SDVector":
-            self.__vector = pysdsl.SDVector(bitvector)
-        # self.__nucleotides = nt_kept
-        # if column_seq == "BitVector":
-        #     self.__vector.append(column_seq)
-        # elif vector == "SDVector":
-        #     self.__vector = [pysdsl.SDVector(bit_vector) for bit_vector in column_seq]
-        # print(type(self.__vector))
-        # print(self.__vector)
+        if load:
+            self.__vector, self.__nucleotides = self.load_from_file(dir_path=dir_path, column_nb=column)
+        else:
+            self.__nucleotides = nt_kept
+            if vector == "BitVector":
+                self.__vector = bitvector
+            elif vector == "SDVector":
+                self.__vector = pysdsl.SDVector(bitvector)
 
     def __len__(self):
         return len(self.__vector)
-
-    @staticmethod
-    def seq_to_bitvector_nts(column_seq):
-        """
-        Builds a sequence of 0 and 1 and a string of nucleotides corresponding to the "1" from the nucleotides in a column. To clarify,
-        if in the column a nucleotide if the same as the previous one, the value at the considered position is 0, else it is 1.
-
-        Parameters:
-        -----------
-        column_seq : str
-            All the nucleotides in a column of a multiple alignment.
-        
-        Return:
-        -------
-        list(int) :
-            List of 0 and 1 representing a simplified version of the column.
-        str : 
-            The nucleotides corresponding to each "1" in the simplified version of the column.
-        """
-        bits_list = []
-        nt_kept = ""
-        previous_nt = ""
-        for nt in column_seq:
-            if nt != previous_nt:
-                bits_list.append(1)
-                nt_kept += nt
-                previous_nt = nt
-            else:
-                bits_list.append(0)
-        return bits_list, nt_kept
 
     def size_in_bytes(self):
         """
@@ -101,18 +68,14 @@ class SuccinctColumn:
             - percentage of C
             - percentage of G
             - percentage of -
-            -percentage of other nucleotide present
         """
         count_one = -1
-        nt_count_dict = defaultdict(int)
-        
+        nt_count_dict = {"A": 0, "T": 0, "C": 0, "G": 0, "-": 0}
         for byte in self.__vector:
             if byte == 1:
                 count_one += 1
             nt_count_dict[self.__nucleotides[count_one]] += 1
-            
         length_vector = len(self.__vector)
-        print(nt_count_dict)
         return tuple(round(nt_count_dict[char]/float(length_vector), decimals) for char in nt_count_dict)
     
     def get_nt(self, position):
@@ -167,3 +130,48 @@ class SuccinctColumn:
             The nucleotides kept.
         """
         return self.__nucleotides
+
+    def store_to_file(self, column_number, project_name, output_dir='./save/'):
+        """
+        Store the SDVector and the nucleotides in two files.
+        Do not use if the bit vector is represented by a pysdsl.BitVector.
+
+        Parameters:
+        -----------
+        column_number : int
+            The index (in python) of the current column in the sequence
+        project_name : str
+            The name of the directory where the files will be created (Originally designed to store several Succinct_columns in one directory)
+        output_dir : str
+            The path / the directory where the directory 'project_name' will be created
+
+        Return:
+        -------
+        None
+        """
+        self.__vector.store_to_file('{}/{}/{}_column'.format(output_dir, project_name, column_number))
+        with open('{}/{}/{}.txt'.format(output_dir, project_name, column_number), 'w') as fileIn:
+            fileIn.write(self.__nucleotides)
+
+    def load_from_file(self, dir_path, column_nb):
+        """
+        Create a Succinct_column from the files produced by the store_to_file() function.
+
+        Parameters:
+        -----------
+        dir_path : str
+            The path / the save from which to recreate the saved Succinct_column.
+        column_nb : int
+            The index (in python) of the current column in the sequence
+
+        Return:
+        -------
+        pysdsl.SDVector :
+            The SDVector object corresponding to the compacted representation of the bit vector of the column specified.
+        nucleotides : str
+            Nucleotides corresponding to the '1' in the bit vector.
+        """
+        vector = pysdsl.SDVector.load_from_file('{}/{}_column'.format(dir_path, column_nb))
+        with open('{}/{}.txt'.format(dir_path, column_nb)) as fileIn:
+            nucleotides = fileIn.readline()
+        return vector, nucleotides

@@ -8,12 +8,13 @@ from succinct_column import SuccinctColumn
 from Bio import SeqIO
 import pysdsl
 import gzip
-import csv 
+import subprocess
 
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file, nb_columns=1000, vector="SDVector", compressed=False):
+    def __init__(self, fasta_file, nb_columns=1000, save_dir='./save/', vector="SDVector", compressed=False,
+                 load_file=False):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -28,15 +29,19 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
+        self.__project_name = os.path.basename(fasta_file).split('.')[0]
         self.__multialign = []
-        if compressed:
-            self.__size, self.__length = self.fetch_alignment_size_compress(fasta_file)
-            for position in range(0, self.__length, nb_columns):
-                self.__multialign += self.fetch_column_compress(fasta_file, position, nb_columns, vector)
+        if load_file:
+            self.__multialign, self.__size, self.__length = self.load_from_file(save_dir)
         else:
-            self.__size, self.__length = self.fetch_alignment_size(fasta_file)
-            for position in range(0, self.__length, nb_columns):
-                self.__multialign += self.fetch_column(fasta_file, position, nb_columns, vector)
+            if compressed:
+                self.__size, self.__length = self.fetch_alignment_size_compress(fasta_file)
+                for position in range(0, self.__length, nb_columns):
+                    self.__multialign += self.fetch_column_compress(fasta_file, position, nb_columns, vector)
+            else:
+                self.__size, self.__length = self.fetch_alignment_size(fasta_file)
+                for position in range(0, self.__length, nb_columns):
+                    self.__multialign += self.fetch_column(fasta_file, position, nb_columns, vector)
 
     def __len__(self):
         return len(self.__multialign)        
@@ -76,12 +81,12 @@ class SuccinctMultipleAlignment:
     @staticmethod
     def fetch_alignment_size_compress(fasta_file):
         """
-        Read the FASTA file and store the size and the number of sequences.
+        Read the compressed FASTA file and store the size and the number of sequences.
 
         Parameters:
         -----------
         fasta_file : str
-            A FASTA file containing multiple sequences aligned.
+            A compressed FASTA file containing multiple sequences aligned.
 
         Return:
         -------
@@ -146,19 +151,19 @@ class SuccinctMultipleAlignment:
         sd_vector = []
 
         for i in range(len(bit_vectors)):
-            sd_vector.append(SuccinctColumn(bit_vectors[i], nt_kept[i], vector=vector))
+            sd_vector.append(SuccinctColumn(bitvector=bit_vectors[i], nt_kept=nt_kept[i], vector=vector))
         del bit_vectors, nt_kept, previous_nt
         return sd_vector
 
     def fetch_column_compress(self, fasta_file, position, nb_column, vector="SDVector"):
         """
         Read the FASTA file and store 'nb_column' columns as SuccinctColumn objects in a list.
-        To do that, it reads 'nb_column' nucleotides in each sequence, starting at the position 'position' in the file 'fasta_file'.
+        To do that, it reads 'nb_column' nucleotides in each sequence, starting at the position 'position' in the compressed file 'fasta_file'.
 
         Parameters:
         -----------
         fasta_file : str
-            A FASTA file containing multiple sequences aligned.
+            A compressed FASTA file containing multiple sequences aligned.
         position : int
             The position in the sequence where the search starts.
         nb_column : int
@@ -191,7 +196,7 @@ class SuccinctMultipleAlignment:
         sd_vector = []
 
         for i in range(len(bit_vectors)):
-            sd_vector.append(SuccinctColumn(bit_vectors[i], nt_kept[i], vector=vector))
+            sd_vector.append(SuccinctColumn(bitvector=bit_vectors[i], nt_kept=nt_kept[i], vector=vector))
         del bit_vectors, nt_kept, previous_nt
         return sd_vector
 
@@ -223,7 +228,8 @@ class SuccinctMultipleAlignment:
 
         Return:
         -------
-        str : The nucleotide in the position specified in the sequence of index "seq_index".
+        str :
+            The nucleotide in the position specified in the sequence of index "seq_index".
         """
         return self.__multialign[position].get_nt(seq_index)
 
@@ -291,35 +297,73 @@ class SuccinctMultipleAlignment:
             The alignment size (number of sequences).
         """
         return self.__length, self.__size
-    
-    def size_to_csv(self, file_name="size.csv", sort_by_size=True):
+
+    def column_size_in_bytes(self, index):
         """
-        Save the size in bytes of each SuccinctColumn object in a CSV file.
+        Return the size in bytes of the SuccinctColumn objects at the index.
 
         Parameters:
         -----------
-        file_name: str, optional
-            The name of the CSV file to save the sizes. Default is "size.csv".
-        sort_by_size: bool, optional
-            If True, the sizes will be sorted in ascending order. Default is True.
+        index : int
+            The column consideres.
+
+        Return:
+        -------
+        int :
+            The size in bytes of the selected SuccinctColumn objects.
+        """
+        return self.__multialign[index].size_in_bytes()
+
+    def store_to_file(self, output_dir='./save/'):
+        """
+        Store all the Succinct_column in the SuccinctMultipleAlignment, in a compressed directory
+
+        Parameters:
+        -----------
+        output_dir : str
+            The path / the directory where the save will be created
 
         Return:
         -------
         None
         """
-        ### la liste de tailles des colonnes 
-        sizes = [(i, self.__multialign[i].size_in_bytes()) for i in range(self.__length)]
-        ### triee les colonnes par ordre croissant  de taille 
-        if sort_by_size:
-            sizes.sort(key=lambda x: x[1])
-        # ecriture dans le fichier CSV
-        with open(file_name, "w") as fileOut:
-            # 
-            writer = csv.writer(fileOut)
-            # ecriture d'en-tetes du csv
-            writer.writerow(["Index", "column sorted by size","cumulative column sizes "])
-            cumulative_size = 0
-            for i, size in sizes:
-                ###### pour la partie qui cumule  les tailles des colonnes
-                cumulative_size += size
-                writer.writerow([i, size, cumulative_size])
+        save_path = output_dir + '{}'.format(self.__project_name)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        with open(save_path + '/info.txt', 'w') as fileOut:
+            fileOut.write('{},{}'.format(self.__size, self.__length))
+        for succinct_column in self.__multialign:
+            succinct_column.store_to_file(column_number=self.__multialign.index(succinct_column),
+                                         project_name=self.__project_name, output_dir=output_dir)
+        subprocess.call(['tar', '-zcf', '{}{}.tar.gz'.format(output_dir,self.__project_name),
+                         '{}/{}'.format(output_dir, self.__project_name)])
+        subprocess.call(['rm', '-r', '{}/{}'.format(output_dir, self.__project_name)])
+
+    def load_from_file(self, compressed_save):
+        """
+        Create a SuccinctMultipleAlignment from the files produced by the store_to_file() function.
+
+        Parameters:
+        -----------
+        input_dir : str
+            The path / the save from which to recreate the saved SuccinctMultipleAlignment.
+
+        Return:
+        -------
+        list :
+            All the Succinct_column
+        int :
+            The number of sequences.
+        int :
+            The length of the sequences (which is supposed to be the same for every sequence).
+        """
+        list_succinct_columns = []
+        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save)])
+        with open(compressed_save + '/info.txt') as fileIn:
+            info = fileIn.readline().split(',')
+            size = int(info[0])
+            length = int(info[1])
+        for i in range(len(os.listdir('{}'.format(compressed_save)))/2):
+            list_succinct_columns.append(SuccinctColumn(load=True, dir_path=compressed_save, column=i))
+        subprocess.call(['rm', '-r', '{}'.format(compressed_save)])
+        return list_succinct_columns, size, length
