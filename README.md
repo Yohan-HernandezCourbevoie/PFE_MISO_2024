@@ -42,9 +42,9 @@ Activation de l'environnement:
 pip install https://github.com/QratorLabs/pysdsl/releases/download/1.0.0a0/pysdsl-1.0.0a0-cp27-cp27mu-linux_x86_64.whl
 ```
 #### Installation de Biopython pour py27
-"""js
+```js
 mamba install biopython=1.76
-"""
+```
 
 ## 4. Fonctionnalités
 
