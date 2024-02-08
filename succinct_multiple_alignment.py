@@ -292,7 +292,7 @@ class SuccinctMultipleAlignment:
         """
         return self.__length, self.__size
     
-   def size_to_csv(self, file_name="size.csv", sort_by_size=True):
+    def size_to_csv(self, file_name="size.csv", sort_by_size=True):
         """
         Save the size in bytes of each SuccinctColumn object in a CSV file.
 

@@ -1,57 +1,14 @@
+# Modules import
 from succinct_multiple_alignment import SuccinctMultipleAlignment
 from succinct_column import SuccinctColumn
+import argparse
 import time
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import os
 import psutil
 
-align = SuccinctMultipleAlignment('1000_seq.fasta', nb_columns=1000)
 
-print("SuccinctMultipleAlignment :")
-print('len() :')
-print(len(align))
-print('size_in_bytes() :')
-print(align.size_in_bytes())
-
-# print('fetch_column() :')
-# fetch_column = align.fetch_column_V2('1000_seq.fasta', 0, 1000)
-# print(fetch_column[0].get_vector())
-
-print('get_nt() :')
-print(align.get_nt(3, 5))
-
-# print('get_sequence() :')
-# print(align.get_sequence(3))
-
-# print('get_vector() :')
-# print(align.get_vector(0))
-
-print('get_kept_nucleotide() :')
-print(align.get_kept_nucleotide(6))
-
-print('get_info() :')
-print(align.get_info())
-
-
-# print('\nSuccinctColumn :')
-#
-# column = fetch_column[0]
-#
-# print('size_in_bytes() :')
-# print(column.size_in_bytes())
-# 
-# print('len() :')
-# print(len(column))
-#
-# print('get_nt() :')
-# print(column.get_nt(3))
-
-# print('get_vector() :')
-# print(column.get_vector())
-
-# print('nt_frequency() :')
-# print(column.nt_frequency())
-
+# Functions definition
 def time_profile(func, *args, **kwargs):
     #Enregistre le temps au debut avant l'execution de la fonction
     start_time = time.time()
@@ -102,7 +59,38 @@ def plot_time_memory_psutil(func, *args, **kwargs):
     plt.title('Memory Usage')
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig("img.png")
 
-# Exemple d'utilisation :
-plot_time_memory_psutil(align.fetch_column, '1000_seq.fasta', 0, 1000)
+
+# Main program
+if __name__ == "__main__":
+    # Arguments definition.
+    parser = argparse.ArgumentParser(description="Compare a file of sequencing reads to a reference genome.")
+    parser.add_argument("--file", "-f", help="Le fichier multifasta contenant l'alignement multiple.", 
+                        type=str, required=True, action='store')
+    parser.add_argument("--ncols", "-n", help="Le nombre de colonnes lues a chaque lecture du fichier.",
+                        type=int, default=1000, action='store')
+    parser.add_argument("--compressed", "-c", help="Le fichier est compresse.", action='store_true')
+    parser.add_argument("--infos", "-i", help="Ecrit des informations generales sur l'alignement multiple dans le terminal.",
+                        action='store_true')
+    parser.add_argument("--performance", "-p", help="Affiche les performances du programme en terme de temps et de memoire.",
+                        action='store_true')
+    args = parser.parse_args()
+
+    # Assert that the file exists.
+    if not os.path.isfile(args.file):
+        raise FileNotFoundError(args.file)
+
+
+    align = SuccinctMultipleAlignment(args.file, nb_columns=args.ncols, compressed=args.compressed)
+    
+    if args.infos:
+        print("SuccinctMultipleAlignment :")
+        print('infos :')
+        print(align.get_info())
+        print('size_in_bytes():')
+        print(align.size_in_bytes())
+    
+    if args.performance:
+        plot_time_memory_psutil(align.fetch_column, args.file, 0, args.ncols)
+

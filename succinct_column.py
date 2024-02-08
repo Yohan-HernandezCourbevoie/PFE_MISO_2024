@@ -85,7 +85,7 @@ class SuccinctColumn:
         """
         return self.__vector.size_in_bytes + len(self.__nucleotides)
 
-   def nt_frequency(self, decimals=2):
+    def nt_frequency(self, decimals=2):
         """
         Returns the percentage of each nucleotide in the column.
 
