@@ -3,6 +3,8 @@ from succinct_multiple_alignment import SuccinctMultipleAlignment
 from succinct_column import SuccinctColumn
 import argparse
 import time
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import psutil
