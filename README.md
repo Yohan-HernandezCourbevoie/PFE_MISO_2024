@@ -86,3 +86,27 @@ Cette méthode recrée un SuccinctMultipleAlignment à partir des fichiers produ
 
 #### 11. La méthode 'find_columns_with_excessive_space()': 
 Il identifie les colonnes qui occupent significativement plus d'espace que la taille moyenne des colonnes.
+
+
+### Classe 'SuccinctColumn' :
+#### 1.Construction de l'objet : 
+La classe permet de construire un objet SuccinctColumn à partir d'un vecteur de bits (SDVector ou BiTvector ) et des nucléotides correspondant aux "1" dans le vecteur.
+#### 2.Calcul de la taille en bytes de l'objet:
+La méthode 'size_in_bytes() 'fournit une fonction pour calculer la taille en bytes de l'objet SuccinctColumn, ce qui donne une indication de l'espace mémoire occupé par la colonne de l'alignement.
+
+#### 3. Calcul de la fréquence des nucléotides dans la colonne :
+La méthode 'nt_frequency()' permet de calculer la fréquence des différents nucléotides présents dans la colonne, ce qui permet d'évaluer la diversité nucléotidique.
+#### 4. Extraction de nucléotides spécifiques dans la colonne :
+ La méthode 'get_nt()' permet d'extraire un nucléotide spécifique d'une colonne donnée de l'alignement multiple en spécifiant sa position.
+
+#### 5. Récupération du vecteur SDVector :
+La méthode 'get_vector()' permet d'obtenir l'objet SDVector correspondant à la représentation compacte du vecteur de bits de la colonne.
+
+#### 6. Récupération des nucléotides conservés :
+La méthode 'get_kept_nucleotide()'renvoie les nucléotides utilisés pour déduire la séquence de la colonne à partir du vecteur de bits.elle initialise un objet init_rank pour accéder aux rangs des 1 dans le vecteur de bits.
+
+#### 7. La méthode 'store_to_file()'
+Elle  stocke le vecteur SDVector et les nucléotides dans deux fichiers distinct.
+
+#### 8. La méthode 'load_from_file(self, dir_path, column_nb)':
+Elle charge un objet pysdsl.SDVector et les nucléotides à partir des fichiers créés par la méthode store_to_file().
