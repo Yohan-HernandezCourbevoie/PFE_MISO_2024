@@ -136,7 +136,7 @@ class SuccinctColumn:
         """
         return self.__nucleotides
 
-    def store_to_file(self, column_number, project_name, output_dir='./save/'):
+    def store_to_file(self, column_number, project_name, output_dir):
         """
         Store the SDVector and the nucleotides in two files.
         Do not use if the bit vector is represented by a pysdsl.BitVector.
