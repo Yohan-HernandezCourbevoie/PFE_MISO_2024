@@ -57,20 +57,32 @@ Cette classe permet de construire un alignement multiple à partir d'un fichier 
 
 #### 2. Extraction de colonnes specifiques
 
+La methode 'fetch_column'  qui lit le fichier FASTA et stocker les colonnes 'nb_column' sous forme d'objets SuccinctColumn dans une liste
 #### 3. Calcul de la taille en bytes de l'alignement 
-
+La méthode 'size_in_bytes()'
+renvoie la taille en octets de l'ensemble de l'alignement multiple succinct, ce qui donne une indication de l'espace mémoire occupé par l'alignement.
 
 #### 4.Extraction de nucléotides specifique dans une colonne 
-
+La méthode 'get_nt()'
+permet d'extraire un nucléotide spécifique d'une colonne donnée de l'alignement multiple en spécifiant sa position.
 
 ####  5. Récupération de la sequence d'une colonne 
-
+La méthode 'get_sequence()' retourner la séquence d'index "seq_index"
 #### 6. Récupération du vecteur SDVector 
+ La méthode 'get_vector()' permet d'obtenir l'objet SDVector correspondant à la représentation compacte du vecteur de bits d'une colonne donnée.
 
 #### 7.Récupération des nucléotides conservés
+ La méthode 'get_kept_nucleotide()' permet de récupérer les nucléotides conservés utilisés pour déduire la séquence de la colonne à partir du vecteur de bits.
 
-#### 8.Calcul de la fréquence des nucléotides dans une colonne
-#### 9. Sauvegarde de la taille des colonnes dans un fichier CSVqaz
+#### 8. Sauvegarde en fichier CSV
 
+La méthode 'size_to_csv()' retourne un fichier CSV contient trois colonnes : l'index de la colonne, la taille de la colonne triée par taille (si triée), et la taille cumulative des colonnes 
 
-####
+#### 9. La méthode 'store_to_file(self, output_dir)': 
+Cette méthode stocke tous les objets SuccinctColumn de l'SuccinctMultipleAlignment dans un répertoire compressé. Elle prend en paramètre le répertoire de sortie où le fichier compressé sera créé. Les colonnes sont stockées individuellement dans le répertoire, puis le répertoire est compressé en un fichier tar.gz. Un fichier info.txt est également créé pour stocker des informations sur la taille et la longueur des séquences.
+
+#### 10: La méthode 'load_from_file(self, compressed_save)': 
+Cette méthode recrée un SuccinctMultipleAlignment à partir des fichiers produits par la méthode store_to_file(). Elle prend en paramètre le chemin du fichier compressé. Les fichiers sont extraits du fichier compressé, les informations sur la taille et la longueur des séquences sont récupérées à partir du fichier info.txt, puis les SuccinctColumn sont chargés à partir des fichiers individuels pour reconstruire l'alignement multiple.
+
+#### 11. La méthode 'find_columns_with_excessive_space()': 
+Il identifie les colonnes qui occupent significativement plus d'espace que la taille moyenne des colonnes.
