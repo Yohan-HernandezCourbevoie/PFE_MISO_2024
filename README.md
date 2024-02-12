@@ -110,3 +110,11 @@ Elle  stocke le vecteur SDVector et les nucléotides dans deux fichiers distinct
 
 #### 8. La méthode 'load_from_file(self, dir_path, column_nb)':
 Elle charge un objet pysdsl.SDVector et les nucléotides à partir des fichiers créés par la méthode store_to_file().
+
+
+## Exécution  du Programme :
+
+Pour exécuter le programme, utilisez la commande suivante dans votre terminal :
+```
+python script_test.py --file "exemple.fasta" --ncols 1000 --compressed --infos --performance 
+```
