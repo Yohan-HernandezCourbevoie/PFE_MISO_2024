@@ -14,7 +14,7 @@ import csv
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file, nb_columns=1000, save_dir='./save/', vector="SDVector", compressed=False,
+    def __init__(self, fasta_file=None, save_dir=None, nb_columns=1000, vector="SDVector", compressed=False,
                  load_file=False):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
@@ -30,11 +30,12 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
-        self.__project_name = os.path.basename(fasta_file).split('.')[0]
         self.__multialign = []
         if load_file:
+            self.__project_name = os.path.basename(save_dir).split('.')[0]
             self.__multialign, self.__size, self.__length = self.load_from_file(save_dir)
         else:
+            self.__project_name = os.path.basename(fasta_file).split('.')[0]
             if compressed:
                 self.__size, self.__length = self.fetch_alignment_size_compress(fasta_file)
                 for position in range(0, self.__length, nb_columns):
@@ -347,7 +348,7 @@ class SuccinctMultipleAlignment:
         """
         return self.__multialign[index].size_in_bytes()
 
-    def store_to_file(self, output_dir='./save/'):
+    def store_to_file(self, output_dir):
         """
         Store all the Succinct_column in the SuccinctMultipleAlignment, in a compressed directory
 
@@ -392,38 +393,12 @@ class SuccinctMultipleAlignment:
         """
         list_succinct_columns = []
         subprocess.call(['tar', '-zxf', '{}'.format(compressed_save)])
-        with open(compressed_save + '/info.txt') as fileIn:
+        path = os.path.dirname(compressed_save) + '/{}'.format(self.__project_name)
+        with open(path + '/info.txt') as fileIn:
             info = fileIn.readline().split(',')
             size = int(info[0])
             length = int(info[1])
-        for i in range(len(os.listdir('{}'.format(compressed_save)))/2):
-            list_succinct_columns.append(SuccinctColumn(load=True, dir_path=compressed_save, column=i))
-        subprocess.call(['rm', '-r', '{}'.format(compressed_save)])
+        for i in range(((len(os.listdir(path))-1)/2)):
+            list_succinct_columns.append(SuccinctColumn(load=True, dir_path=path, column=i))
+        subprocess.call(['rm', '-r', '{}'.format(path)])
         return list_succinct_columns, size, length
-
-
-    def find_columns_with_excessive_space(self, threshold_ratio=2):
-        """
-        Identifies columns that occupy significantly more space than the average column size.
-
-        Parameters:
-        -----------
-        threshold_ratio : float, optional
-            The threshold ratio used to determine whether a column occupies significantly more space than the average column size.
-            Default value is 2, meaning a column is considered to occupy significantly more space if its size is at least twice the average size.
-
-        Returns:
-        --------
-        list[int]:
-            A list of indices of columns that occupy significantly more space than the average column size.
-        """
-        average_size = sum(succinct_column.size_in_bytes() for succinct_column in self.__multialign) / len(self.__multialign)
-        print(average_size)
-        size_excessive=0
-        size=0
-        excessive_columns = []#[index for index, succinct_column in enumerate(self.__multialign) if succinct_column.size_in_bytes() >= threshold_ratio * average_size]
-        for index, succinct_column in enumerate(self.__multialign) :
-            size+=succinct_column.size_in_bytes()
-            if succinct_column.size_in_bytes() >= threshold_ratio * average_size:
-                excessive_columns.append(index)
-                size_excessive+=(succinct_column.size_in_bytes())
