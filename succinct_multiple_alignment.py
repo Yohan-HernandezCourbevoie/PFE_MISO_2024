@@ -402,3 +402,35 @@ class SuccinctMultipleAlignment:
             list_succinct_columns.append(SuccinctColumn(load=True, dir_path=path, column=i))
         subprocess.call(['rm', '-r', '{}'.format(path)])
         return list_succinct_columns, size, length
+
+
+    def find_columns_with_excessive_space(self, threshold_ratio=2):
+        """
+        Identifies columns that occupy significantly more space than the average column size.
+
+        Parameters:
+        -----------
+        threshold_ratio : float, optional
+            The threshold ratio used to determine whether a column occupies significantly more space than the average column size.
+            Default value is 2, meaning a column is considered to occupy significantly more space if its size is at least twice the average size.
+
+        Returns:
+        --------
+        list[int]:
+            A list of indices of columns that occupy significantly more space than the average column size.
+        """
+        average_size = sum(succinct_column.size_in_bytes() for succinct_column in self.__multialign) / len(self.__multialign)
+        print(average_size)
+        size_excessive=0
+        size=0
+        excessive_columns = []#[index for index, succinct_column in enumerate(self.__multialign) if succinct_column.size_in_bytes() >= threshold_ratio * average_size]
+        for index, succinct_column in enumerate(self.__multialign) :
+            size+=succinct_column.size_in_bytes()
+            if succinct_column.size_in_bytes() >= threshold_ratio * average_size:
+                excessive_columns.append(index)
+                size_excessive+=(succinct_column.size_in_bytes())
+
+        print('total size :' ,size)
+        print('excessive_columns size :', size_excessive)
+
+        return len(excessive_columns), len(self.__multialign)
