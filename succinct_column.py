@@ -69,19 +69,20 @@ class SuccinctColumn:
             - percentage of C
             - percentage of G
             - percentage of -
-            - percentage of other nucleotide present
+            -percentage of other nucleotide present
         """
         count_one = -1
         nt_count_dict = defaultdict(int)
-
+        
         for byte in self.__vector:
             if byte == 1:
                 count_one += 1
             nt_count_dict[self.__nucleotides[count_one]] += 1
 
+            
         length_vector = len(self.__vector)
-        print(nt_count_dict)
-        return tuple(round(nt_count_dict[char] / float(length_vector), decimals) for char in nt_count_dict)
+        
+        return [(nt, round(count / float(length_vector), decimals)) for nt, count in nt_count_dict.items()]
     
     def get_nt(self, position):
         """ 
