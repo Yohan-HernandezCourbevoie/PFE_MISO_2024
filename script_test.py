@@ -68,7 +68,8 @@ def plot_time_memory_psutil(func, *args, **kwargs):
 if __name__ == "__main__":
     # Arguments definition.
     parser = argparse.ArgumentParser(description="Compare a file of sequencing reads to a reference genome.")
-    parser.add_argument("--file", "-f", help="Le fichier multifasta contenant l'alignement multiple.", 
+    parser.add_argument("--file", "-f", help="Le fichier multifasta contenant l'alignement multiple."
+                                             "ou bien le fichier de sauvegarde de l'alignement multiple succinct",
                         type=str, required=True, action='store')
     parser.add_argument("--ncols", "-n", help="Le nombre de colonnes lues a chaque lecture du fichier.",
                         type=int, default=1000, action='store')
@@ -77,14 +78,19 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument("--performance", "-p", help="Affiche les performances du programme en terme de temps et de memoire.",
                         action='store_true')
+    parser.add_argument("--save", "-s", help="Stocke l'alignement multiple succinct dans un dossier compresse.",
+                        action='store_true')
+    parser.add_argument('--save_dir', '-sd', help="Chemin vers le repertoire ou sera strocker l'alignement multiple succinct",
+                        type=str, action='store')
+    parser.add_argument("--load", "-l", help="Charge l'alignement multiple succinct depuis un fichier de sauvegarde",
+                        action='store_true')
     args = parser.parse_args()
 
     # Assert that the file exists.
     if not os.path.isfile(args.file):
         raise FileNotFoundError(args.file)
 
-
-    align = SuccinctMultipleAlignment(args.file, nb_columns=args.ncols, compressed=args.compressed)
+    align = SuccinctMultipleAlignment(args.file, nb_columns=args.ncols, compressed=args.compressed, load_file=args.load)
     
     if args.infos:
         print("SuccinctMultipleAlignment :")
@@ -96,3 +102,5 @@ if __name__ == "__main__":
     if args.performance:
         plot_time_memory_psutil(align.fetch_column, args.file, 0, args.ncols)
 
+    if args.save:
+        align.store_to_file(args.save_dir)

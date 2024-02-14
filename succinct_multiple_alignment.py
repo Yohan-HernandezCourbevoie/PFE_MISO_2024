@@ -14,8 +14,7 @@ import csv
 # Class definition
 class SuccinctMultipleAlignment:
 
-    def __init__(self, fasta_file=None, save_dir=None, nb_columns=1000, vector="SDVector", compressed=False,
-                 load_file=False):
+    def __init__(self, fasta_file, nb_columns=1000, vector="SDVector", compressed=False, load_file=False):
         """
         Build the succinct multiple alignment as a list of objects SuccinctColumn.
 
@@ -32,8 +31,8 @@ class SuccinctMultipleAlignment:
         """
         self.__multialign = []
         if load_file:
-            self.__project_name = os.path.basename(save_dir).split('.')[0]
-            self.__multialign, self.__size, self.__length = self.load_from_file(save_dir)
+            self.__project_name = os.path.basename(fasta_file).split('.')[0]
+            self.__multialign, self.__size, self.__length = self.load_from_file(fasta_file)
         else:
             self.__project_name = os.path.basename(fasta_file).split('.')[0]
             if compressed:
@@ -361,17 +360,22 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
-        save_path = output_dir + '{}'.format(self.__project_name)
+        if output_dir[-1] == '/':
+            clean_output_dir = output_dir[0:-1]
+            save_path = clean_output_dir + '{}'.format(self.__project_name)
+        else:
+            clean_output_dir = output_dir
+            save_path = clean_output_dir + '/{}'.format(self.__project_name)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         with open(save_path + '/info.txt', 'w') as fileOut:
             fileOut.write('{},{}'.format(self.__size, self.__length))
         for succinct_column in self.__multialign:
             succinct_column.store_to_file(column_number=self.__multialign.index(succinct_column),
-                                         project_name=self.__project_name, output_dir=output_dir)
-        subprocess.call(['tar', '-zcf', '{}{}.tar.gz'.format(output_dir,self.__project_name),
-                         '{}/{}'.format(output_dir, self.__project_name)])
-        subprocess.call(['rm', '-r', '{}/{}'.format(output_dir, self.__project_name)])
+                                         project_name=self.__project_name, output_dir=clean_output_dir)
+        subprocess.call(['tar', '-zPcf','{}/{}.tar.gz'.format(clean_output_dir ,self.__project_name),
+                         '{}/{}'.format(clean_output_dir, self.__project_name)])
+        subprocess.call(['rm', '-r', '{}/{}'.format(clean_output_dir, self.__project_name)])
 
     def load_from_file(self, compressed_save):
         """
@@ -392,7 +396,7 @@ class SuccinctMultipleAlignment:
             The length of the sequences (which is supposed to be the same for every sequence).
         """
         list_succinct_columns = []
-        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save)])
+        subprocess.call(['tar', '-zPxf', '{}'.format(compressed_save)])
         path = os.path.dirname(compressed_save) + '/{}'.format(self.__project_name)
         with open(path + '/info.txt') as fileIn:
             info = fileIn.readline().split(',')
