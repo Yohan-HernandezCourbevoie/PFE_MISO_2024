@@ -116,5 +116,5 @@ Elle charge un objet pysdsl.SDVector et les nucléotides à partir des fichiers 
 
 Pour exécuter le programme, utilisez la commande suivante dans votre terminal :
 ```
-python script_test.py --file "exemple.fasta" --ncols 1000 --compressed --infos --performance 
+Exemple python script_test.py --file "exemple.fasta" --ncols 1000 --compressed --infos --performance 
 ```
