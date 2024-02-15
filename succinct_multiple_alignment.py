@@ -331,6 +331,14 @@ class SuccinctMultipleAlignment:
                 cumulative_size += size
                 writer.writerow([i, size, cumulative_size])
 
+        # Plot
+        plt.plot(range(len(cumulative_sizes)), cumulative_sizes)
+        plt.xlabel('Sorted Column Index')
+        plt.ylabel('Cumulative Size')
+        plt.title('Cumulative Column Sizes')
+        plt.grid(True)
+        plt.show()
+
     def column_size_in_bytes(self, index):
         """
         Return the size in bytes of the SuccinctColumn objects at the index.
