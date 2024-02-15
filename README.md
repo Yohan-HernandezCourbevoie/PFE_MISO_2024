@@ -57,26 +57,26 @@ Cette classe permet de construire un alignement multiple à partir d'un fichier 
 
 #### 2. Extraction de colonnes specifiques
 
-La methode 'fetch_column'  qui lit le fichier FASTA et stocker les colonnes 'nb_column' sous forme d'objets SuccinctColumn dans une liste
+La methode '**fetch_column()**'  qui lit le fichier FASTA et stocker les colonnes 'nb_column' sous forme d'objets SuccinctColumn dans une liste
 #### 3. Calcul de la taille en bytes de l'alignement 
-La méthode 'size_in_bytes()'
+La méthode '**size_in_bytes()**'
 renvoie la taille en octets de l'ensemble de l'alignement multiple succinct, ce qui donne une indication de l'espace mémoire occupé par l'alignement.
 
 #### 4.Extraction de nucléotides specifique dans une colonne 
-La méthode 'get_nt()'
+La méthode '**get_nt()**'
 permet d'extraire un nucléotide spécifique d'une colonne donnée de l'alignement multiple en spécifiant sa position.
 
 ####  5. Récupération de la sequence d'une colonne 
-La méthode 'get_sequence()' retourner la séquence d'index "seq_index"
+La méthode '**get_sequence()**' retourner la séquence d'index "seq_index"
 #### 6. Récupération du vecteur SDVector 
- La méthode 'get_vector()' permet d'obtenir l'objet SDVector correspondant à la représentation compacte du vecteur de bits d'une colonne donnée.
+ La méthode '**get_vector()**' permet d'obtenir l'objet SDVector correspondant à la représentation compacte du vecteur de bits d'une colonne donnée.
 
 #### 7.Récupération des nucléotides conservés
- La méthode 'get_kept_nucleotide()' permet de récupérer les nucléotides conservés utilisés pour déduire la séquence de la colonne à partir du vecteur de bits.
+ La méthode '**get_kept_nucleotide()**' permet de récupérer les nucléotides conservés utilisés pour déduire la séquence de la colonne à partir du vecteur de bits.
 
 #### 8. Sauvegarde en fichier CSV
 
-La méthode 'size_to_csv()' retourne un fichier CSV contient trois colonnes : l'index de la colonne, la taille de la colonne triée par taille (si triée), et la taille cumulative des colonnes 
+La méthode '**size_to_csv()**' retourne un fichier CSV contient trois colonnes : l'index de la colonne, la taille de la colonne triée par taille (si triée), et la taille cumulative des colonnes 
 
 #### 9. La méthode 'store_to_file(self, output_dir)': 
 Cette méthode stocke tous les objets SuccinctColumn de l'SuccinctMultipleAlignment dans un répertoire compressé. Elle prend en paramètre le répertoire de sortie où le fichier compressé sera créé. Les colonnes sont stockées individuellement dans le répertoire, puis le répertoire est compressé en un fichier tar.gz. Un fichier info.txt est également créé pour stocker des informations sur la taille et la longueur des séquences.
