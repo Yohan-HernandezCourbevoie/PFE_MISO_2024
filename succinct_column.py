@@ -137,7 +137,7 @@ class SuccinctColumn:
         """
         return self.__nucleotides
 
-    def store_to_file(self, column_number, project_name, output_dir):
+    def store_to_file(self, column_number, output_dir):
         """
         Store the SDVector and the nucleotides in two files.
         Do not use if the bit vector is represented by a pysdsl.BitVector.
@@ -155,8 +155,8 @@ class SuccinctColumn:
         -------
         None
         """
-        self.__vector.store_to_file('{}/{}/{}_column'.format(output_dir, project_name, column_number))
-        with open('{}/{}/{}.txt'.format(output_dir, project_name, column_number), 'w') as fileIn:
+        self.__vector.store_to_file('{}/{}_column'.format(output_dir, column_number))
+        with open('{}/{}.txt'.format(output_dir, column_number), 'w') as fileIn:
             fileIn.write(self.__nucleotides)
 
     def load_from_file(self, dir_path, column_nb):
