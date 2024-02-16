@@ -401,7 +401,8 @@ class SuccinctMultipleAlignment:
         """
         list_succinct_columns = []
         tmpdir = tempfile.mkdtemp(dir=os.path.dirname(compressed_save))
-        direct = tmpdir + '/{}'.format(self.__project_name)
+        name = os.path.basename(compressed_save).split('.')[0]
+        direct = tmpdir + '/{}'.format(name)
         subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(tmpdir)])
         with open(direct + '/info.txt') as fileIn:
             info = fileIn.readline().split(',')
