@@ -10,6 +10,8 @@ import pysdsl
 import gzip
 import subprocess
 import csv
+import tempfile
+import matplotlib as plt
 
 # Class definition
 class SuccinctMultipleAlignment:
@@ -368,22 +370,16 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
-        if output_dir[-1] == '/':
-            clean_output_dir = output_dir[0:-1]
-            save_path = clean_output_dir + '{}'.format(self.__project_name)
-        else:
-            clean_output_dir = output_dir
-            save_path = clean_output_dir + '/{}'.format(self.__project_name)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        with open(save_path + '/info.txt', 'w') as fileOut:
+        tmpdir = tempfile.mkdtemp(dir=output_dir)
+        final_dir = tmpdir + '/{}'.format(self.__project_name)
+        os.makedirs(final_dir)
+        with open(final_dir + '/info.txt', 'w') as fileOut:
             fileOut.write('{},{}'.format(self.__size, self.__length))
         for succinct_column in self.__multialign:
-            succinct_column.store_to_file(column_number=self.__multialign.index(succinct_column),
-                                         project_name=self.__project_name, output_dir=clean_output_dir)
-        subprocess.call(['tar', '-zPcf','{}/{}.tar.gz'.format(clean_output_dir ,self.__project_name),
-                         '{}/{}'.format(clean_output_dir, self.__project_name)])
-        subprocess.call(['rm', '-r', '{}/{}'.format(clean_output_dir, self.__project_name)])
+            succinct_column.store_to_file(column_number=self.__multialign.index(succinct_column), output_dir=final_dir)
+        subprocess.call(['tar', '-zcf','{}.tar.gz'.format(self.__project_name), '{}'.format(self.__project_name)],
+                        cwd=tmpdir)
+        subprocess.call(['mv', '{}/{}.tar.gz'.format(tmpdir, self.__project_name), output_dir])
 
     def load_from_file(self, compressed_save):
         """
@@ -404,15 +400,14 @@ class SuccinctMultipleAlignment:
             The length of the sequences (which is supposed to be the same for every sequence).
         """
         list_succinct_columns = []
-        subprocess.call(['tar', '-zPxf', '{}'.format(compressed_save)])
-        path = os.path.dirname(compressed_save) + '/{}'.format(self.__project_name)
-        with open(path + '/info.txt') as fileIn:
+        direct = os.path.dirname(compressed_save) + '/{}'.format(self.__project_name)
+        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(direct)])
+        with open(direct + '/info.txt') as fileIn:
             info = fileIn.readline().split(',')
             size = int(info[0])
             length = int(info[1])
-        for i in range(((len(os.listdir(path))-1)/2)):
-            list_succinct_columns.append(SuccinctColumn(load=True, dir_path=path, column=i))
-        subprocess.call(['rm', '-r', '{}'.format(path)])
+        for i in range(length):
+            list_succinct_columns.append(SuccinctColumn(load=True, dir_path=direct, column=i))
         return list_succinct_columns, size, length
 
 
