@@ -400,8 +400,11 @@ class SuccinctMultipleAlignment:
             The length of the sequences (which is supposed to be the same for every sequence).
         """
         list_succinct_columns = []
-        direct = os.path.dirname(compressed_save) + '/{}'.format(self.__project_name)
-        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(direct)])
+        tmpdir = tempfile.mkdtemp(dir=os.path.dirname(compressed_save))
+        print tmpdir
+        direct = tmpdir + '/{}'.format(self.__project_name)
+        print(direct)
+        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(tmpdir)])
         with open(direct + '/info.txt') as fileIn:
             info = fileIn.readline().split(',')
             size = int(info[0])
