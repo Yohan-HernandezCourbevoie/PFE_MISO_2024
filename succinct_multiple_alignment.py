@@ -432,7 +432,6 @@ class SuccinctMultipleAlignment:
             A list of indices of columns that occupy significantly more space than the average column size.
         """
         average_size = sum(succinct_column.size_in_bytes() for succinct_column in self.__multialign) / len(self.__multialign)
-        print(average_size)
         size_excessive=0
         size=0
         excessive_columns = []#[index for index, succinct_column in enumerate(self.__multialign) if succinct_column.size_in_bytes() >= threshold_ratio * average_size]
@@ -441,8 +440,4 @@ class SuccinctMultipleAlignment:
             if succinct_column.size_in_bytes() >= threshold_ratio * average_size:
                 excessive_columns.append(index)
                 size_excessive+=(succinct_column.size_in_bytes())
-
-        print('total size :' ,size)
-        print('excessive_columns size :', size_excessive)
-
         return len(excessive_columns), len(self.__multialign)
