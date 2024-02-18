@@ -12,6 +12,7 @@ import subprocess
 import csv
 import tempfile
 import matplotlib as plt
+import shutil
 
 # Class definition
 class SuccinctMultipleAlignment:
@@ -370,7 +371,7 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
-        tmpdir = tempfile.mkdtemp(dir=output_dir)
+        tmpdir = tempfile.mkdtemp()
         final_dir = tmpdir + '/{}'.format(self.__project_name)
         os.makedirs(final_dir)
         with open(final_dir + '/info.txt', 'w') as fileOut:
@@ -380,6 +381,7 @@ class SuccinctMultipleAlignment:
         subprocess.call(['tar', '-zcf','{}.tar.gz'.format(self.__project_name), '{}'.format(self.__project_name)],
                         cwd=tmpdir)
         subprocess.call(['mv', '{}/{}.tar.gz'.format(tmpdir, self.__project_name), output_dir])
+        shutil.rmtree(tmpdir)
 
     def load_from_file(self, compressed_save):
         """
@@ -400,7 +402,7 @@ class SuccinctMultipleAlignment:
             The length of the sequences (which is supposed to be the same for every sequence).
         """
         list_succinct_columns = []
-        tmpdir = tempfile.mkdtemp(dir=os.path.dirname(compressed_save))
+        tmpdir = tempfile.mkdtemp()
         name = os.path.basename(compressed_save).split('.')[0]
         direct = tmpdir + '/{}'.format(name)
         subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(tmpdir)])
@@ -410,6 +412,7 @@ class SuccinctMultipleAlignment:
             length = int(info[1])
         for i in range(length):
             list_succinct_columns.append(SuccinctColumn(load=True, dir_path=direct, column=i))
+        shutil.rmtree(tmpdir)
         return list_succinct_columns, size, length
 
 
@@ -429,7 +432,6 @@ class SuccinctMultipleAlignment:
             A list of indices of columns that occupy significantly more space than the average column size.
         """
         average_size = sum(succinct_column.size_in_bytes() for succinct_column in self.__multialign) / len(self.__multialign)
-        print(average_size)
         size_excessive=0
         size=0
         excessive_columns = []#[index for index, succinct_column in enumerate(self.__multialign) if succinct_column.size_in_bytes() >= threshold_ratio * average_size]
@@ -438,8 +440,4 @@ class SuccinctMultipleAlignment:
             if succinct_column.size_in_bytes() >= threshold_ratio * average_size:
                 excessive_columns.append(index)
                 size_excessive+=(succinct_column.size_in_bytes())
-
-        print('total size :' ,size)
-        print('excessive_columns size :', size_excessive)
-
         return len(excessive_columns), len(self.__multialign)
