@@ -12,6 +12,7 @@ import subprocess
 import csv
 import tempfile
 import matplotlib as plt
+import shutil
 
 # Class definition
 class SuccinctMultipleAlignment:
@@ -370,7 +371,7 @@ class SuccinctMultipleAlignment:
         -------
         None
         """
-        tmpdir = tempfile.mkdtemp(dir=output_dir)
+        tmpdir = tempfile.mkdtemp()
         final_dir = tmpdir + '/{}'.format(self.__project_name)
         os.makedirs(final_dir)
         with open(final_dir + '/info.txt', 'w') as fileOut:
@@ -380,6 +381,7 @@ class SuccinctMultipleAlignment:
         subprocess.call(['tar', '-zcf','{}.tar.gz'.format(self.__project_name), '{}'.format(self.__project_name)],
                         cwd=tmpdir)
         subprocess.call(['mv', '{}/{}.tar.gz'.format(tmpdir, self.__project_name), output_dir])
+        shutil.rmtree(tmpdir)
 
     def load_from_file(self, compressed_save):
         """
@@ -400,14 +402,17 @@ class SuccinctMultipleAlignment:
             The length of the sequences (which is supposed to be the same for every sequence).
         """
         list_succinct_columns = []
-        direct = os.path.dirname(compressed_save) + '/{}'.format(self.__project_name)
-        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(direct)])
+        tmpdir = tempfile.mkdtemp()
+        name = os.path.basename(compressed_save).split('.')[0]
+        direct = tmpdir + '/{}'.format(name)
+        subprocess.call(['tar', '-zxf', '{}'.format(compressed_save), '-C', '{}'.format(tmpdir)])
         with open(direct + '/info.txt') as fileIn:
             info = fileIn.readline().split(',')
             size = int(info[0])
             length = int(info[1])
         for i in range(length):
             list_succinct_columns.append(SuccinctColumn(load=True, dir_path=direct, column=i))
+        shutil.rmtree(tmpdir)
         return list_succinct_columns, size, length
 
 
