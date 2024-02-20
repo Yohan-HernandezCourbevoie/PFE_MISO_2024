@@ -98,6 +98,10 @@ if __name__ == "__main__":
         print(align.get_info())
         print('size_in_bytes():')
         print(align.size_in_bytes())
+        print('find_columns_with_excessive_space:')
+        print(align.find_columns_with_excessive_space())
+        print("Exportation fichier CSV:")
+        print(align.size_to_csv())
     
     if args.performance:
         plot_time_memory_psutil(align.fetch_column, args.file, 0, args.ncols)
