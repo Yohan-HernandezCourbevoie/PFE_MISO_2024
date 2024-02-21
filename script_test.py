@@ -8,6 +8,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import psutil
+import json
 
 
 # Functions definition

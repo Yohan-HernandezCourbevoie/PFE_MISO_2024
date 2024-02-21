@@ -11,7 +11,7 @@ import gzip
 import subprocess
 import csv
 import tempfile
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import shutil
 
 # Class definition
@@ -324,16 +324,18 @@ class SuccinctMultipleAlignment:
             sizes.sort(key=lambda x: x[1])
         # ecriture dans le fichier CSV
         with open(file_name, "w") as fileOut:
-            #
+            cumulative_sizes = []
             writer = csv.writer(fileOut)
             # ecriture d'en-tetes du csv
             writer.writerow(["Index", "column sorted by size", "cumulative column sizes "])
             cumulative_size = 0
+            cumulative_sizes.append(cumulative_size)
             for i, size in sizes:
                 ###### pour la partie qui cumule  les tailles des colonnes
                 cumulative_size += size
+                cumulative_sizes.append(cumulative_size)
                 writer.writerow([i, size, cumulative_size])
-
+        
         # Plot
         plt.plot(range(len(cumulative_sizes)), cumulative_sizes)
         plt.xlabel('Sorted Column Index')
@@ -341,6 +343,7 @@ class SuccinctMultipleAlignment:
         plt.title('Cumulative Column Sizes')
         plt.grid(True)
         plt.show()
+        
 
     def column_size_in_bytes(self, index):
         """
@@ -432,7 +435,7 @@ class SuccinctMultipleAlignment:
             A list of indices of columns that occupy significantly more space than the average column size.
         """
         average_size = sum(succinct_column.size_in_bytes() for succinct_column in self.__multialign) / len(self.__multialign)
-      
+        excessive_columns = []
         size_excessive=0
         size=0
         for index, succinct_column in enumerate(self.__multialign) :
@@ -445,3 +448,5 @@ class SuccinctMultipleAlignment:
         print('excessive_columns size :', size_excessive)
 
         return len(excessive_columns), len(self.__multialign)
+    
+    
